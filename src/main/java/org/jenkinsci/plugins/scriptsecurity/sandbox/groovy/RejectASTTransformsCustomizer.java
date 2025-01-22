@@ -50,89 +50,89 @@ import java.util.List;
 
 public class RejectASTTransformsCustomizer extends CompilationCustomizer {
 
-    // For Crafter we will still allow Grapes
-    private static final List<String> BLOCKED_TRANSFORMS = ImmutableList.of(ASTTest.class.getCanonicalName(),
-            AnnotationCollector.class.getCanonicalName());
+	// For Crafter we will still allow Grapes
+	private static final List<String> BLOCKED_TRANSFORMS = ImmutableList.of(ASTTest.class.getCanonicalName(),
+		AnnotationCollector.class.getCanonicalName());
 
-    public RejectASTTransformsCustomizer() {
-        super(CompilePhase.CONVERSION);
-    }
+	public RejectASTTransformsCustomizer() {
+		super(CompilePhase.CONVERSION);
+	}
 
-    @Override
-    public void call(final SourceUnit source, GeneratorContext context, ClassNode classNode) throws CompilationFailedException {
-        new RejectASTTransformsVisitor(source).visitClass(classNode);
-    }
+	@Override
+	public void call(final SourceUnit source, GeneratorContext context, ClassNode classNode) throws CompilationFailedException {
+		new RejectASTTransformsVisitor(source).visitClass(classNode);
+	}
 
-    // Note: Methods in this visitor that override methods from the superclass should call the implementation from the
-    // superclass to ensure that any nested AST nodes are traversed.
-    private static class RejectASTTransformsVisitor extends ClassCodeVisitorSupport {
-        private SourceUnit source;
+	// Note: Methods in this visitor that override methods from the superclass should call the implementation from the
+	// superclass to ensure that any nested AST nodes are traversed.
+	private static class RejectASTTransformsVisitor extends ClassCodeVisitorSupport {
+		private SourceUnit source;
 
-        public RejectASTTransformsVisitor(SourceUnit source) {
-            this.source = source;
-        }
+		public RejectASTTransformsVisitor(SourceUnit source) {
+			this.source = source;
+		}
 
-        @Override
-        protected SourceUnit getSourceUnit() {
-            return source;
-        }
+		@Override
+		protected SourceUnit getSourceUnit() {
+			return source;
+		}
 
-        @Override
-        public void visitImports(ModuleNode node) {
-            if (node != null) {
-                for (ImportNode importNode : node.getImports()) {
-                    checkImportForBlockedAnnotation(importNode);
-                }
-                for (ImportNode importStaticNode : node.getStaticImports().values()) {
-                    checkImportForBlockedAnnotation(importStaticNode);
-                }
-            }
-            super.visitImports(node);
-        }
+		@Override
+		public void visitImports(ModuleNode node) {
+			if (node != null) {
+				for (ImportNode importNode : node.getImports()) {
+					checkImportForBlockedAnnotation(importNode);
+				}
+				for (ImportNode importStaticNode : node.getStaticImports().values()) {
+					checkImportForBlockedAnnotation(importStaticNode);
+				}
+			}
+			super.visitImports(node);
+		}
 
-        private void checkImportForBlockedAnnotation(ImportNode node) {
-            if (node != null && node.getType() != null) {
-                for (String blockedAnnotation : getBlockedTransforms()) {
-                    if (blockedAnnotation.equals(node.getType().getName()) || blockedAnnotation.endsWith("." + node.getType().getName())) {
-                        throw new UnsupportedOperationException("Insecure annotation '" + node.getType().getName() +
-                                "' you can tweak the security sandbox to allow it. Read more about this in the " +
-                                "documentation.");
-                    }
-                }
-            }
-        }
+		private void checkImportForBlockedAnnotation(ImportNode node) {
+			if (node != null && node.getType() != null) {
+				for (String blockedAnnotation : getBlockedTransforms()) {
+					if (blockedAnnotation.equals(node.getType().getName()) || blockedAnnotation.endsWith("." + node.getType().getName())) {
+						throw new UnsupportedOperationException("Insecure annotation '" + node.getType().getName() +
+							"' you can tweak the security sandbox to allow it. Read more about this in the " +
+							"documentation.");
+					}
+				}
+			}
+		}
 
-        /**
-         * If the node is annotated with one of the blocked transform annotations, throw a security exception.
-         *
-         * @param node the node to process
-         */
-        @Override
-        public void visitAnnotations(AnnotatedNode node) {
-            for (AnnotationNode an : node.getAnnotations()) {
-                for (String blockedAnnotation : getBlockedTransforms()) {
-                    if (blockedAnnotation.equals(an.getClassNode().getName()) || blockedAnnotation.endsWith("." + an.getClassNode().getName())) {
-                        throw new UnsupportedOperationException("Insecure annotation '" + an.getClassNode().getName() +
-                                "' you can tweak the security sandbox to allow it. Read more about this in the " +
-                                "documentation.");
-                    }
-                }
-            }
-            super.visitAnnotations(node);
-        }
-    }
+		/**
+		 * If the node is annotated with one of the blocked transform annotations, throw a security exception.
+		 *
+		 * @param node the node to process
+		 */
+		@Override
+		public void visitAnnotations(AnnotatedNode node) {
+			for (AnnotationNode an : node.getAnnotations()) {
+				for (String blockedAnnotation : getBlockedTransforms()) {
+					if (blockedAnnotation.equals(an.getClassNode().getName()) || blockedAnnotation.endsWith("." + an.getClassNode().getName())) {
+						throw new UnsupportedOperationException("Insecure annotation '" + an.getClassNode().getName() +
+							"' you can tweak the security sandbox to allow it. Read more about this in the " +
+							"documentation.");
+					}
+				}
+			}
+			super.visitAnnotations(node);
+		}
+	}
 
-    private static List<String> getBlockedTransforms() {
-        List<String> blocked = new ArrayList<>(BLOCKED_TRANSFORMS);
+	private static List<String> getBlockedTransforms() {
+		List<String> blocked = new ArrayList<>(BLOCKED_TRANSFORMS);
 
-        String additionalBlocked = System.getProperty(RejectASTTransformsCustomizer.class.getName() + ".ADDITIONAL_BLOCKED_TRANSFORMS");
+		String additionalBlocked = System.getProperty(RejectASTTransformsCustomizer.class.getName() + ".ADDITIONAL_BLOCKED_TRANSFORMS");
 
-        if (additionalBlocked != null) {
-            for (String b : additionalBlocked.split(",")) {
-                blocked.add(b.trim());
-            }
-        }
+		if (additionalBlocked != null) {
+			for (String b : additionalBlocked.split(",")) {
+				blocked.add(b.trim());
+			}
+		}
 
-        return blocked;
-    }
+		return blocked;
+	}
 }

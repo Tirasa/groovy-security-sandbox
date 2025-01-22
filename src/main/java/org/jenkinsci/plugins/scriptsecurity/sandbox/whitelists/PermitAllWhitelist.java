@@ -31,39 +31,39 @@ import java.lang.reflect.Method;
  */
 public class PermitAllWhitelist extends Whitelist {
 
-    @Override
-    public boolean permitsMethod(@Nonnull Method method, @Nonnull Object receiver, @Nonnull Object[] args) {
-        return true;
-    }
+	@Override
+	public boolean permitsMethod(@Nonnull Method method, @Nonnull Object receiver, @Nonnull Object[] args) {
+		return true;
+	}
 
-    @Override
-    public boolean permitsConstructor(@Nonnull Constructor<?> constructor, @Nonnull Object[] args) {
-        return true;
-    }
+	@Override
+	public boolean permitsConstructor(@Nonnull Constructor<?> constructor, @Nonnull Object[] args) {
+		return true;
+	}
 
-    @Override
-    public boolean permitsStaticMethod(@Nonnull Method method, @Nonnull Object[] args) {
-        return true;
-    }
+	@Override
+	public boolean permitsStaticMethod(@Nonnull Method method, @Nonnull Object[] args) {
+		return true;
+	}
 
-    @Override
-    public boolean permitsFieldGet(@Nonnull Field field, @Nonnull Object receiver) {
-        return true;
-    }
+	@Override
+	public boolean permitsFieldGet(@Nonnull Field field, @Nonnull Object receiver) {
+		return true;
+	}
 
-    @Override
-    public boolean permitsFieldSet(@Nonnull Field field, @Nonnull Object receiver, @CheckForNull Object value) {
-        return true;
-    }
+	@Override
+	public boolean permitsFieldSet(@Nonnull Field field, @Nonnull Object receiver, @CheckForNull Object value) {
+		return true;
+	}
 
-    @Override
-    public boolean permitsStaticFieldGet(@Nonnull Field field) {
-        return true;
-    }
+	@Override
+	public boolean permitsStaticFieldGet(@Nonnull Field field) {
+		return true;
+	}
 
-    @Override
-    public boolean permitsStaticFieldSet(@Nonnull Field field, @CheckForNull Object value) {
-        return true;
-    }
+	@Override
+	public boolean permitsStaticFieldSet(@Nonnull Field field, @CheckForNull Object value) {
+		return true;
+	}
 
 }

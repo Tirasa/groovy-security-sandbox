@@ -30,43 +30,43 @@ import java.lang.reflect.Method;
  */
 public class Blacklist extends StaticWhitelist {
 
-    public Blacklist(Reader definition) throws IOException {
-        super(definition);
-    }
+	public Blacklist(Reader definition) throws IOException {
+		super(definition);
+	}
 
-    @Override
-    public boolean permitsMethod(Method method, Object receiver, Object[] args) {
-        return !super.permitsMethod(method, receiver, args);
-    }
+	@Override
+	public boolean permitsMethod(Method method, Object receiver, Object[] args) {
+		return !super.permitsMethod(method, receiver, args);
+	}
 
-    @Override
-    public boolean permitsConstructor(Constructor<?> constructor, Object[] args) {
-        return !super.permitsConstructor(constructor, args);
-    }
+	@Override
+	public boolean permitsConstructor(Constructor<?> constructor, Object[] args) {
+		return !super.permitsConstructor(constructor, args);
+	}
 
-    @Override
-    public boolean permitsStaticMethod(Method method, Object[] args) {
-        return !super.permitsStaticMethod(method, args);
-    }
+	@Override
+	public boolean permitsStaticMethod(Method method, Object[] args) {
+		return !super.permitsStaticMethod(method, args);
+	}
 
-    @Override
-    public boolean permitsFieldGet(Field field, Object receiver) {
-        return !super.permitsFieldGet(field, receiver);
-    }
+	@Override
+	public boolean permitsFieldGet(Field field, Object receiver) {
+		return !super.permitsFieldGet(field, receiver);
+	}
 
-    @Override
-    public boolean permitsFieldSet(Field field, Object receiver, Object value) {
-        return super.permitsFieldSet(field, receiver, value);
-    }
+	@Override
+	public boolean permitsFieldSet(Field field, Object receiver, Object value) {
+		return super.permitsFieldSet(field, receiver, value);
+	}
 
-    @Override
-    public boolean permitsStaticFieldGet(Field field) {
-        return !super.permitsStaticFieldGet(field);
-    }
+	@Override
+	public boolean permitsStaticFieldGet(Field field) {
+		return !super.permitsStaticFieldGet(field);
+	}
 
-    @Override
-    public boolean permitsStaticFieldSet(Field field, Object value) {
-        return super.permitsStaticFieldSet(field, value);
-    }
+	@Override
+	public boolean permitsStaticFieldSet(Field field, Object value) {
+		return super.permitsStaticFieldSet(field, value);
+	}
 
 }
