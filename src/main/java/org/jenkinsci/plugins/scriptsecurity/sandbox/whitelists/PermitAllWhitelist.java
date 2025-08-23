@@ -1,24 +1,27 @@
 /*
- * Copyright (C) 2007-2022 Crafter Software Corporation. All Rights Reserved.
+ * Copyright 2014 CloudBees, Inc.
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 3 as published by
- * the Free Software Foundation.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
 package org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists;
 
 import org.jenkinsci.plugins.scriptsecurity.sandbox.Whitelist;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -27,43 +30,41 @@ import java.lang.reflect.Method;
  * Implementation of {@link Whitelist} that permits the execution of all code.
  *
  * @author joseross
- * @since 3.1.15
  */
 public class PermitAllWhitelist extends Whitelist {
 
-	@Override
-	public boolean permitsMethod(@Nonnull Method method, @Nonnull Object receiver, @Nonnull Object[] args) {
-		return true;
-	}
+    @Override
+    public boolean permitsMethod(final Method method, final Object receiver, final Object[] args) {
+        return true;
+    }
 
-	@Override
-	public boolean permitsConstructor(@Nonnull Constructor<?> constructor, @Nonnull Object[] args) {
-		return true;
-	}
+    @Override
+    public boolean permitsConstructor(final Constructor<?> constructor, final Object[] args) {
+        return true;
+    }
 
-	@Override
-	public boolean permitsStaticMethod(@Nonnull Method method, @Nonnull Object[] args) {
-		return true;
-	}
+    @Override
+    public boolean permitsStaticMethod(final Method method, final Object[] args) {
+        return true;
+    }
 
-	@Override
-	public boolean permitsFieldGet(@Nonnull Field field, @Nonnull Object receiver) {
-		return true;
-	}
+    @Override
+    public boolean permitsFieldGet(final Field field, final Object receiver) {
+        return true;
+    }
 
-	@Override
-	public boolean permitsFieldSet(@Nonnull Field field, @Nonnull Object receiver, @CheckForNull Object value) {
-		return true;
-	}
+    @Override
+    public boolean permitsFieldSet(final Field field, final Object receiver, final Object value) {
+        return true;
+    }
 
-	@Override
-	public boolean permitsStaticFieldGet(@Nonnull Field field) {
-		return true;
-	}
+    @Override
+    public boolean permitsStaticFieldGet(final Field field) {
+        return true;
+    }
 
-	@Override
-	public boolean permitsStaticFieldSet(@Nonnull Field field, @CheckForNull Object value) {
-		return true;
-	}
-
+    @Override
+    public boolean permitsStaticFieldSet(final Field field, final Object value) {
+        return true;
+    }
 }

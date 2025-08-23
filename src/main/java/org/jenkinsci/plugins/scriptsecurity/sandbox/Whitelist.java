@@ -1,6 +1,4 @@
 /*
- * The MIT License
- *
  * Copyright 2014 CloudBees, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package org.jenkinsci.plugins.scriptsecurity.sandbox;
 
 import java.lang.reflect.Constructor;
@@ -32,84 +29,83 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 
 /**
  * Determines which methods and similar members which scripts may call.
  */
 public abstract class Whitelist {
 
-	private static final Logger LOGGER = Logger.getLogger(Whitelist.class.getName());
+    private static final Logger LOG = Logger.getLogger(Whitelist.class.getName());
 
-	private List<String> getEnvWhitelistRegex = new ArrayList<>();
+    private List<String> getEnvWhitelistRegex = new ArrayList<>();
 
-	/**
-	 * Cache the System.getenv method for comparing
-	 */
-	private Method getenvMethod;
+    /**
+     * Cache the System.getenv method for comparing
+     */
+    private Method getenvMethod;
 
-	public Whitelist() {
-		try {
-			this.getenvMethod = System.class.getMethod("getenv", String.class);
-		} catch (NoSuchMethodException e) {
-			LOGGER.log(Level.WARNING, "No such method 'getenv' in class 'System'.", e);
-		}
-	}
+    public Whitelist() {
+        try {
+            this.getenvMethod = System.class.getMethod("getenv", String.class);
+        } catch (NoSuchMethodException e) {
+            LOG.log(Level.WARNING, "No such method 'getenv' in class 'System'.", e);
+        }
+    }
 
-	/**
-	 * Set a list of regex of environment variables name that is allowed to be called
-	 *
-	 * @param getEnvWhitelistRegex the regex list
-	 */
-	public void setGetEnvWhitelistRegex(List<String> getEnvWhitelistRegex) {
-		this.getEnvWhitelistRegex = getEnvWhitelistRegex;
-	}
+    /**
+     * Set a list of regex of environment variables name that is allowed to be called
+     *
+     * @param getEnvWhitelistRegex the regex list
+     */
+    public void setGetEnvWhitelistRegex(final List<String> getEnvWhitelistRegex) {
+        this.getEnvWhitelistRegex = getEnvWhitelistRegex;
+    }
 
-	/**
-	 * Return true if the given method is allowed System.getEnv()
-	 *
-	 * @param m    the method
-	 * @param args the method arguments
-	 * @return true if allowed, false otherwise
-	 */
-	public boolean isAllowedGetEnvSystemMethod(@Nonnull Method m, @Nonnull Object[] args) {
-		if (m.equals(getenvMethod)) {
-			String envName = (String) args[0];
-			// Match the envName against the regex
-			for (String regex : getEnvWhitelistRegex) {
-				if (Pattern.matches(regex, envName)) {
-					return true;
-				}
-			}
-		}
+    /**
+     * Return true if the given method is allowed System.getEnv()
+     *
+     * @param m the method
+     * @param args the method arguments
+     * @return true if allowed, false otherwise
+     */
+    public boolean isAllowedGetEnvSystemMethod(final Method m, final Object[] args) {
+        if (m.equals(getenvMethod)) {
+            String envName = (String) args[0];
+            // Match the envName against the regex
+            for (String regex : getEnvWhitelistRegex) {
+                if (Pattern.matches(regex, envName)) {
+                    return true;
+                }
+            }
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	/**
-	 * Checks whether a given virtual method may be invoked.
-	 * <p>Note that {@code method} should not be implementing or overriding a method in a supertype;
-	 * in such a case the caller must pass that supertype method instead.
-	 * In other words, call site selection is the responsibility of the caller (such as {@code GroovySandbox}), not the whitelist.
-	 *
-	 * @param method   a method defined in the JVM
-	 * @param receiver {@code this}, the receiver of the method call
-	 * @param args     zero or more arguments
-	 * @return true to allow the method to be called, false to reject it
-	 */
-	public abstract boolean permitsMethod(@Nonnull Method method, @Nonnull Object receiver, @Nonnull Object[] args);
+    /**
+     * Checks whether a given virtual method may be invoked.
+     * <p>
+     * Note that {@code method} should not be implementing or overriding a method in a supertype;
+     * in such a case the caller must pass that supertype method instead.
+     * In other words, call site selection is the responsibility of the caller (such as {@code GroovySandbox}), not the
+     * whitelist.
+     *
+     * @param method a method defined in the JVM
+     * @param receiver {@code this}, the receiver of the method call
+     * @param args zero or more arguments
+     * @return true to allow the method to be called, false to reject it
+     */
+    public abstract boolean permitsMethod(Method method, Object receiver, Object[] args);
 
-	public abstract boolean permitsConstructor(@Nonnull Constructor<?> constructor, @Nonnull Object[] args);
+    public abstract boolean permitsConstructor(Constructor<?> constructor, Object[] args);
 
-	public abstract boolean permitsStaticMethod(@Nonnull Method method, @Nonnull Object[] args);
+    public abstract boolean permitsStaticMethod(Method method, Object[] args);
 
-	public abstract boolean permitsFieldGet(@Nonnull Field field, @Nonnull Object receiver);
+    public abstract boolean permitsFieldGet(Field field, Object receiver);
 
-	public abstract boolean permitsFieldSet(@Nonnull Field field, @Nonnull Object receiver, @CheckForNull Object value);
+    public abstract boolean permitsFieldSet(Field field, Object receiver, Object value);
 
-	public abstract boolean permitsStaticFieldGet(@Nonnull Field field);
+    public abstract boolean permitsStaticFieldGet(Field field);
 
-	public abstract boolean permitsStaticFieldSet(@Nonnull Field field, @CheckForNull Object value);
-
+    public abstract boolean permitsStaticFieldSet(Field field, Object value);
 }

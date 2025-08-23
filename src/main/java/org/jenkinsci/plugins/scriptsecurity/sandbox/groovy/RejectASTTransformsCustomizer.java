@@ -1,7 +1,5 @@
 /*
- * The MIT License
- *
- * Copyright (c) 2018, CloudBees, Inc.
+ * Copyright 2014 CloudBees, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,17 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package org.jenkinsci.plugins.scriptsecurity.sandbox.groovy;
 
-import com.google.common.collect.ImmutableList;
-import groovy.lang.Grab;
-import groovy.lang.GrabConfig;
-import groovy.lang.GrabExclude;
-import groovy.lang.GrabResolver;
-import groovy.lang.Grapes;
 import groovy.transform.ASTTest;
 import groovy.transform.AnnotationCollector;
+import java.util.ArrayList;
+import java.util.List;
 import org.codehaus.groovy.ast.AnnotatedNode;
 import org.codehaus.groovy.ast.AnnotationNode;
 import org.codehaus.groovy.ast.ClassCodeVisitorSupport;
@@ -44,95 +37,102 @@ import org.codehaus.groovy.control.CompilePhase;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.customizers.CompilationCustomizer;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 public class RejectASTTransformsCustomizer extends CompilationCustomizer {
 
-	// For Crafter we will still allow Grapes
-	private static final List<String> BLOCKED_TRANSFORMS = ImmutableList.of(ASTTest.class.getCanonicalName(),
-		AnnotationCollector.class.getCanonicalName());
+    // For Crafter we will still allow Grapes
+    private static final List<String> BLOCKED_TRANSFORMS = List.of(
+            ASTTest.class.getCanonicalName(),
+            AnnotationCollector.class.getCanonicalName());
 
-	public RejectASTTransformsCustomizer() {
-		super(CompilePhase.CONVERSION);
-	}
+    public RejectASTTransformsCustomizer() {
+        super(CompilePhase.CONVERSION);
+    }
 
-	@Override
-	public void call(final SourceUnit source, GeneratorContext context, ClassNode classNode) throws CompilationFailedException {
-		new RejectASTTransformsVisitor(source).visitClass(classNode);
-	}
+    @Override
+    public void call(
+            final SourceUnit source,
+            final GeneratorContext context,
+            final ClassNode classNode) throws CompilationFailedException {
 
-	// Note: Methods in this visitor that override methods from the superclass should call the implementation from the
-	// superclass to ensure that any nested AST nodes are traversed.
-	private static class RejectASTTransformsVisitor extends ClassCodeVisitorSupport {
-		private SourceUnit source;
+        new RejectASTTransformsVisitor(source).visitClass(classNode);
+    }
 
-		public RejectASTTransformsVisitor(SourceUnit source) {
-			this.source = source;
-		}
+    // Note: Methods in this visitor that override methods from the superclass should call the implementation from the
+    // superclass to ensure that any nested AST nodes are traversed.
+    private static final class RejectASTTransformsVisitor extends ClassCodeVisitorSupport {
 
-		@Override
-		protected SourceUnit getSourceUnit() {
-			return source;
-		}
+        private final SourceUnit source;
 
-		@Override
-		public void visitImports(ModuleNode node) {
-			if (node != null) {
-				for (ImportNode importNode : node.getImports()) {
-					checkImportForBlockedAnnotation(importNode);
-				}
-				for (ImportNode importStaticNode : node.getStaticImports().values()) {
-					checkImportForBlockedAnnotation(importStaticNode);
-				}
-			}
-			super.visitImports(node);
-		}
+        private RejectASTTransformsVisitor(final SourceUnit source) {
+            this.source = source;
+        }
 
-		private void checkImportForBlockedAnnotation(ImportNode node) {
-			if (node != null && node.getType() != null) {
-				for (String blockedAnnotation : getBlockedTransforms()) {
-					if (blockedAnnotation.equals(node.getType().getName()) || blockedAnnotation.endsWith("." + node.getType().getName())) {
-						throw new UnsupportedOperationException("Insecure annotation '" + node.getType().getName() +
-							"' you can tweak the security sandbox to allow it. Read more about this in the " +
-							"documentation.");
-					}
-				}
-			}
-		}
+        @Override
+        protected SourceUnit getSourceUnit() {
+            return source;
+        }
 
-		/**
-		 * If the node is annotated with one of the blocked transform annotations, throw a security exception.
-		 *
-		 * @param node the node to process
-		 */
-		@Override
-		public void visitAnnotations(AnnotatedNode node) {
-			for (AnnotationNode an : node.getAnnotations()) {
-				for (String blockedAnnotation : getBlockedTransforms()) {
-					if (blockedAnnotation.equals(an.getClassNode().getName()) || blockedAnnotation.endsWith("." + an.getClassNode().getName())) {
-						throw new UnsupportedOperationException("Insecure annotation '" + an.getClassNode().getName() +
-							"' you can tweak the security sandbox to allow it. Read more about this in the " +
-							"documentation.");
-					}
-				}
-			}
-			super.visitAnnotations(node);
-		}
-	}
+        @Override
+        public void visitImports(final ModuleNode node) {
+            if (node != null) {
+                for (ImportNode importNode : node.getImports()) {
+                    checkImportForBlockedAnnotation(importNode);
+                }
+                for (ImportNode importStaticNode : node.getStaticImports().values()) {
+                    checkImportForBlockedAnnotation(importStaticNode);
+                }
+            }
+            super.visitImports(node);
+        }
 
-	private static List<String> getBlockedTransforms() {
-		List<String> blocked = new ArrayList<>(BLOCKED_TRANSFORMS);
+        private void checkImportForBlockedAnnotation(final ImportNode node) {
+            if (node != null && node.getType() != null) {
+                for (String blockedAnnotation : getBlockedTransforms()) {
+                    if (blockedAnnotation.equals(node.getType().getName())
+                            || blockedAnnotation.endsWith("." + node.getType().getName())) {
 
-		String additionalBlocked = System.getProperty(RejectASTTransformsCustomizer.class.getName() + ".ADDITIONAL_BLOCKED_TRANSFORMS");
+                        throw new UnsupportedOperationException("Insecure annotation '" + node.getType().getName()
+                                + "' you can tweak the security sandbox to allow it. Read more about this in the "
+                                + "documentation.");
+                    }
+                }
+            }
+        }
 
-		if (additionalBlocked != null) {
-			for (String b : additionalBlocked.split(",")) {
-				blocked.add(b.trim());
-			}
-		}
+        /**
+         * If the node is annotated with one of the blocked transform annotations, throw a security exception.
+         *
+         * @param node the node to process
+         */
+        @Override
+        public void visitAnnotations(final AnnotatedNode node) {
+            for (AnnotationNode an : node.getAnnotations()) {
+                for (String blockedAnnotation : getBlockedTransforms()) {
+                    if (blockedAnnotation.equals(an.getClassNode().getName())
+                            || blockedAnnotation.endsWith("." + an.getClassNode().getName())) {
 
-		return blocked;
-	}
+                        throw new UnsupportedOperationException("Insecure annotation '" + an.getClassNode().getName()
+                                + "' you can tweak the security sandbox to allow it. Read more about this in the "
+                                + "documentation.");
+                    }
+                }
+            }
+            super.visitAnnotations(node);
+        }
+    }
+
+    private static List<String> getBlockedTransforms() {
+        List<String> blocked = new ArrayList<>(BLOCKED_TRANSFORMS);
+
+        String additionalBlocked = System.getProperty(
+                RejectASTTransformsCustomizer.class.getName() + ".ADDITIONAL_BLOCKED_TRANSFORMS");
+
+        if (additionalBlocked != null) {
+            for (String b : additionalBlocked.split(",")) {
+                blocked.add(b.trim());
+            }
+        }
+
+        return blocked;
+    }
 }
