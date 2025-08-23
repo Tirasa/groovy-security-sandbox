@@ -24,4 +24,5 @@
 
 # Groovy Security Sandbox
 
-Fork of [Jenkins' Script Security Plugin](https://github.com/jenkinsci/groovy-sandbox) for usage outside Jenkins itself.
+Fork of [Jenkins' Script Security Plugin](https://github.com/jenkinsci/groovy-sandbox) for usage outside Jenkins itself,
+with some goodies from sibling [Crafter CMS' fork](https://github.com/craftercms/groovy-sandbox).
