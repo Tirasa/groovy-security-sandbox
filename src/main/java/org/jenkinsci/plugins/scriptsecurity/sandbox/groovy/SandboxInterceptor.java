@@ -32,6 +32,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -93,9 +94,9 @@ public final class SandboxInterceptor extends GroovyInterceptor {
     /**
      * @see NumberMathModificationInfo
      */
-    private static final Set<String> NUMBER_MATH_NAMES = Set.of(
+    private static final Set<String> NUMBER_MATH_NAMES = new HashSet<>(Arrays.asList(
             "plus", "minus", "multiply", "div", "compareTo", "or", "and", "xor", "intdiv", "mod", "leftShift",
-            "rightShift", "rightShiftUnsigned");
+            "rightShift", "rightShiftUnsigned"));
 
     @Override
     public Object onMethodCall(

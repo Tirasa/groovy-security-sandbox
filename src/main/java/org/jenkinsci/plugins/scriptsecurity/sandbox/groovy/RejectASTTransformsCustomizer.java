@@ -24,6 +24,7 @@ package org.jenkinsci.plugins.scriptsecurity.sandbox.groovy;
 import groovy.transform.ASTTest;
 import groovy.transform.AnnotationCollector;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.codehaus.groovy.ast.AnnotatedNode;
 import org.codehaus.groovy.ast.AnnotationNode;
@@ -40,7 +41,7 @@ import org.codehaus.groovy.control.customizers.CompilationCustomizer;
 public class RejectASTTransformsCustomizer extends CompilationCustomizer {
 
     // For Crafter we will still allow Grapes
-    private static final List<String> BLOCKED_TRANSFORMS = List.of(
+    private static final List<String> BLOCKED_TRANSFORMS = Arrays.asList(
             ASTTest.class.getCanonicalName(),
             AnnotationCollector.class.getCanonicalName());
 

@@ -97,9 +97,9 @@
   </developers>
 
   <properties>
-    <groovy.version>5.0.0</groovy.version>
+    <groovy.version>4.0.28</groovy.version>
 
-    <targetJdk>11</targetJdk>
+    <targetJdk>8</targetJdk>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -140,7 +140,8 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.14.0</version>
           <configuration>
-            <release>${targetJdk}</release>
+            <source>${targetJdk}</source>
+            <target>${targetJdk}</target>
             <useIncrementalCompilation>false</useIncrementalCompilation>
             <showWarnings>true</showWarnings>
             <showDeprecation>true</showDeprecation>
