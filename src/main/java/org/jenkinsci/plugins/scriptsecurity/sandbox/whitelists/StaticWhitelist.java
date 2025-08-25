@@ -1,6 +1,4 @@
 /*
- * The MIT License
- *
  * Copyright 2014 CloudBees, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -273,41 +271,41 @@ public class StaticWhitelist extends EnumeratingWhitelist {
         return staticFieldSignatures;
     }
 
-    public static UnsupportedOperationException rejectMethod(final Method m) {
+    public static SecurityException rejectMethod(final Method m) {
         assert (m.getModifiers() & Modifier.STATIC) == 0;
         return reject("method " + EnumeratingWhitelist.getName(m.getDeclaringClass()) + " " + m.getName()
                 + printArgumentTypes(m.getParameterTypes()));
     }
 
-    public static UnsupportedOperationException rejectMethod(final Method m, final String info) {
+    public static SecurityException rejectMethod(final Method m, final String info) {
         assert (m.getModifiers() & Modifier.STATIC) == 0;
         return reject("method " + EnumeratingWhitelist.getName(m.getDeclaringClass()) + " " + m.getName()
                 + printArgumentTypes(m.getParameterTypes()) + " (" + info + ")");
     }
 
-    public static UnsupportedOperationException rejectNew(final Constructor<?> c) {
+    public static SecurityException rejectNew(final Constructor<?> c) {
         return reject("new " + EnumeratingWhitelist.getName(c.getDeclaringClass())
                 + printArgumentTypes(c.getParameterTypes()));
     }
 
-    public static UnsupportedOperationException rejectStaticMethod(final Method m) {
+    public static SecurityException rejectStaticMethod(final Method m) {
         assert (m.getModifiers() & Modifier.STATIC) != 0;
         return reject("staticMethod " + EnumeratingWhitelist.getName(m.getDeclaringClass()) + " " + m.getName()
                 + printArgumentTypes(m.getParameterTypes()));
     }
 
-    public static UnsupportedOperationException rejectField(final Field f) {
+    public static SecurityException rejectField(final Field f) {
         assert (f.getModifiers() & Modifier.STATIC) == 0;
         return reject("field " + EnumeratingWhitelist.getName(f.getDeclaringClass()) + " " + f.getName());
     }
 
-    public static UnsupportedOperationException rejectStaticField(final Field f) {
+    public static SecurityException rejectStaticField(final Field f) {
         assert (f.getModifiers() & Modifier.STATIC) != 0;
         return reject("staticField " + EnumeratingWhitelist.getName(f.getDeclaringClass()) + " " + f.getName());
     }
 
-    private static UnsupportedOperationException reject(final String detail) {
-        return new UnsupportedOperationException("Insecure call to '" + detail + "' you can tweak the security "
+    private static SecurityException reject(final String detail) {
+        return new SecurityException("Insecure call to '" + detail + "' you can tweak the security "
                 + "sandbox to allow it. Read more about this in the documentation.");
     }
 

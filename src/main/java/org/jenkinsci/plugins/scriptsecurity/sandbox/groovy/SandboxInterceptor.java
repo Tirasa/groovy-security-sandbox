@@ -195,7 +195,7 @@ public final class SandboxInterceptor extends GroovyInterceptor {
 
         Constructor<?> c = GroovyCallSiteSelector.constructor(receiver, args);
         if (c == null) {
-            throw new UnsupportedOperationException("No such constructor found: new "
+            throw new SecurityException("No such constructor found: new "
                     + EnumeratingWhitelist.getName(receiver) + printArgumentTypes(args));
         } else if (StaticWhitelist.isPermanentlyBlacklistedConstructor(c)) {
             throw StaticWhitelist.rejectNew(c);
@@ -216,7 +216,7 @@ public final class SandboxInterceptor extends GroovyInterceptor {
         Method m = GroovyCallSiteSelector.staticMethod(receiver, method, args);
         if (m == null) {
             // TODO consider DefaultGroovyStaticMethods
-            throw new UnsupportedOperationException(
+            throw new SecurityException(
                     "No such static method found: staticMethod "
                     + EnumeratingWhitelist.getName(receiver) + " " + method + printArgumentTypes(args));
         } else if (whitelist.isAllowedGetEnvSystemMethod(m, args)) {
@@ -253,7 +253,7 @@ public final class SandboxInterceptor extends GroovyInterceptor {
                 rejector = new Rejector() {
 
                     @Override
-                    public UnsupportedOperationException reject() {
+                    public SecurityException reject() {
                         return StaticWhitelist.rejectMethod(setterMethod);
                     }
                 };
@@ -268,7 +268,7 @@ public final class SandboxInterceptor extends GroovyInterceptor {
                 rejector = new Rejector() {
 
                     @Override
-                    public UnsupportedOperationException reject() {
+                    public SecurityException reject() {
                         return StaticWhitelist.rejectField(instanceField);
                     }
                 };
@@ -283,7 +283,7 @@ public final class SandboxInterceptor extends GroovyInterceptor {
                     rejector = new Rejector() {
 
                         @Override
-                        public UnsupportedOperationException reject() {
+                        public SecurityException reject() {
                             return StaticWhitelist.rejectStaticMethod(staticSetterMethod);
                         }
                     };
@@ -298,7 +298,7 @@ public final class SandboxInterceptor extends GroovyInterceptor {
                     rejector = new Rejector() {
 
                         @Override
-                        public UnsupportedOperationException reject() {
+                        public SecurityException reject() {
                             return StaticWhitelist.rejectStaticField(staticField);
                         }
                     };
@@ -344,7 +344,7 @@ public final class SandboxInterceptor extends GroovyInterceptor {
                 rejector = new Rejector() {
 
                     @Override
-                    public UnsupportedOperationException reject() {
+                    public SecurityException reject() {
                         return StaticWhitelist.rejectMethod(getterMethod);
                     }
                 };
@@ -362,7 +362,7 @@ public final class SandboxInterceptor extends GroovyInterceptor {
                 rejector = new Rejector() {
 
                     @Override
-                    public UnsupportedOperationException reject() {
+                    public SecurityException reject() {
                         return StaticWhitelist.rejectMethod(booleanGetterMethod);
                     }
                 };
@@ -380,7 +380,7 @@ public final class SandboxInterceptor extends GroovyInterceptor {
                     rejector = new Rejector() {
 
                         @Override
-                        public UnsupportedOperationException reject() {
+                        public SecurityException reject() {
                             return StaticWhitelist.rejectStaticMethod(dgmGetterMethod);
                         }
                     };
@@ -394,7 +394,7 @@ public final class SandboxInterceptor extends GroovyInterceptor {
                     rejector = new Rejector() {
 
                         @Override
-                        public UnsupportedOperationException reject() {
+                        public SecurityException reject() {
                             return StaticWhitelist.rejectStaticMethod(dgmBooleanGetterMethod);
                         }
                     };
@@ -411,7 +411,7 @@ public final class SandboxInterceptor extends GroovyInterceptor {
                 rejector = new Rejector() {
 
                     @Override
-                    public UnsupportedOperationException reject() {
+                    public SecurityException reject() {
                         return StaticWhitelist.rejectField(instanceField);
                     }
                 };
@@ -433,7 +433,7 @@ public final class SandboxInterceptor extends GroovyInterceptor {
                     rejector = new Rejector() {
 
                         @Override
-                        public UnsupportedOperationException reject() {
+                        public SecurityException reject() {
                             return StaticWhitelist.rejectStaticMethod(staticGetterMethod);
                         }
                     };
@@ -450,7 +450,7 @@ public final class SandboxInterceptor extends GroovyInterceptor {
                     rejector = new Rejector() {
 
                         @Override
-                        public UnsupportedOperationException reject() {
+                        public SecurityException reject() {
                             return StaticWhitelist.rejectStaticMethod(staticBooleanGetterMethod);
                         }
                     };
@@ -465,7 +465,7 @@ public final class SandboxInterceptor extends GroovyInterceptor {
                     rejector = new Rejector() {
 
                         @Override
-                        public UnsupportedOperationException reject() {
+                        public SecurityException reject() {
                             return StaticWhitelist.rejectStaticField(staticField);
                         }
                     };
@@ -493,7 +493,7 @@ public final class SandboxInterceptor extends GroovyInterceptor {
 
         Method m = GroovyCallSiteSelector.method(receiver, method, args);
         if (m == null) {
-            throw new UnsupportedOperationException("No such method found: super.method " + EnumeratingWhitelist.
+            throw new SecurityException("No such method found: super.method " + EnumeratingWhitelist.
                     getName(receiver.getClass()) + " " + method + printArgumentTypes(args));
         }
         if (whitelist.permitsMethod(m, receiver, args)) {
@@ -502,15 +502,15 @@ public final class SandboxInterceptor extends GroovyInterceptor {
         throw StaticWhitelist.rejectMethod(m);
     }
 
-    private static UnsupportedOperationException unclassifiedField(final Object receiver, final String property) {
-        return new UnsupportedOperationException("No such field found: field "
+    private static SecurityException unclassifiedField(final Object receiver, final String property) {
+        return new SecurityException("No such field found: field "
                 + EnumeratingWhitelist.getName(receiver.getClass()) + " " + property);
     }
 
     // TODO Java 8: @FunctionalInterface
     private interface Rejector {
 
-        UnsupportedOperationException reject();
+        SecurityException reject();
     }
 
     @Override
@@ -574,7 +574,7 @@ public final class SandboxInterceptor extends GroovyInterceptor {
                 throw StaticWhitelist.rejectStaticMethod(method);
             }
         }
-        throw new UnsupportedOperationException("No such getAt method found: method "
+        throw new SecurityException("No such getAt method found: method "
                 + EnumeratingWhitelist.getName(receiver) + "[" + EnumeratingWhitelist.getName(index) + "]");
     }
 
@@ -607,7 +607,7 @@ public final class SandboxInterceptor extends GroovyInterceptor {
                 throw StaticWhitelist.rejectStaticMethod(method);
             }
         }
-        throw new UnsupportedOperationException("No such putAt method found: putAt method "
+        throw new SecurityException("No such putAt method found: putAt method "
                 + EnumeratingWhitelist.getName(receiver)
                 + "[" + EnumeratingWhitelist.getName(index) + "]=" + EnumeratingWhitelist.getName(value));
     }
