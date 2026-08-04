@@ -30,7 +30,7 @@
   <description>Fork of Jenkins' Script Security Plugin for usage outside Jenkins itself</description>
   <groupId>net.tirasa</groupId>
   <artifactId>groovy-security-sandbox</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <url>https://github.com/Tirasa/groovy-security-sandbox</url>
@@ -97,9 +97,9 @@
   </developers>
 
   <properties>
-    <groovy.version>4.0.28</groovy.version>
+    <groovy.version>6.0.0-beta-1</groovy.version>
 
-    <targetJdk>8</targetJdk>
+    <targetJdk>21</targetJdk>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -120,13 +120,13 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.18.0</version>
+      <version>3.20.0</version>
     </dependency>
 
     <dependency>
       <groupId>org.craftercms</groupId>
       <artifactId>groovy-sandbox</artifactId>
-      <version>4.0.6</version>
+      <version>4.3.2</version>
     </dependency>
   </dependencies>
 
@@ -138,7 +138,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.14.0</version>
+          <version>3.15.0</version>
           <configuration>
             <source>${targetJdk}</source>
             <target>${targetJdk}</target>
@@ -161,7 +161,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
-          <version>3.1.1</version>
+          <version>3.3.1</version>
           <configuration>
             <mavenExecutorId>forked-path</mavenExecutorId>
             <useReleaseProfile>false</useReleaseProfile>
@@ -175,7 +175,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>3.6.1</version>
+        <version>3.6.3</version>
         <executions>
           <execution>
             <id>default-cli</id>
@@ -199,7 +199,7 @@
       <plugin>
         <groupId>org.gaul</groupId>
         <artifactId>modernizer-maven-plugin</artifactId>
-        <version>3.2.0</version>
+        <version>3.5.0</version>
         <configuration>
           <javaVersion>${targetJdk}</javaVersion>
         </configuration>
@@ -234,7 +234,7 @@
       <plugin>
         <groupId>org.apache.rat</groupId>
         <artifactId>apache-rat-plugin</artifactId>
-        <version>0.16.1</version>
+        <version>0.18</version>
         <configuration>
           <excludes>
             <exclude>nbactions.xml</exclude>
@@ -278,7 +278,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>3.3.1</version>
+        <version>3.5.0</version>
         <executions>
           <execution>
             <id>copy-artifact-legal-files</id>
@@ -378,7 +378,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
-            <version>3.3.1</version>
+            <version>3.4.0</version>
             <executions>
               <execution>
                 <id>attach-sources</id>
@@ -397,7 +397,7 @@
           <plugin>
             <groupId>org.sonatype.central</groupId>
             <artifactId>central-publishing-maven-plugin</artifactId>
-            <version>0.8.0</version>
+            <version>0.11.0</version>
             <extensions>true</extensions>
             <configuration>
               <publishingServerId>central-portal</publishingServerId>

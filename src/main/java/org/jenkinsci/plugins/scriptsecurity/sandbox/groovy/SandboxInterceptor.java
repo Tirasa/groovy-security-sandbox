@@ -31,14 +31,11 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.groovy.sql.extensions.SqlExtensions;
@@ -65,38 +62,37 @@ public final class SandboxInterceptor extends GroovyInterceptor {
 
     private final Whitelist whitelist;
 
-    private final Collection<Class<?>> extensions;
+    private final List<Class<?>> extensions;
 
     public SandboxInterceptor(final Whitelist whitelist) {
-        this(whitelist, Arrays.asList(DGM_CLASSES));
+        this(whitelist, DGM_CLASSES);
     }
 
     public SandboxInterceptor(final Whitelist whitelist, final List<Class<?>> extensions) {
         this.whitelist = whitelist;
-        this.extensions = Stream.concat(Stream.of(DGM_CLASSES), extensions.stream()).collect(Collectors.toList());
+        this.extensions = Stream.concat(DGM_CLASSES.stream(), extensions.stream()).toList();
     }
 
     /**
      * should be synchronized with {@link DgmConverter}
      */
-    private static final Class<?>[] DGM_CLASSES = {
-        DefaultGroovyStaticMethods.class,
-        DefaultGroovyMethods.class,
-        StringGroovyMethods.class,
-        EncodingGroovyMethods.class,
-        ProcessGroovyMethods.class,
-        IOGroovyMethods.class,
-        ResourceGroovyMethods.class,
-        EncodingGroovyMethods.class,
-        SqlExtensions.class
-    };
+    private static final List<Class<?>> DGM_CLASSES = List.of(
+            DefaultGroovyStaticMethods.class,
+            DefaultGroovyMethods.class,
+            StringGroovyMethods.class,
+            EncodingGroovyMethods.class,
+            ProcessGroovyMethods.class,
+            IOGroovyMethods.class,
+            ResourceGroovyMethods.class,
+            EncodingGroovyMethods.class,
+            SqlExtensions.class);
 
     /**
      * @see NumberMathModificationInfo
      */
-    private static final Set<String> NUMBER_MATH_NAMES = new HashSet<>(Arrays.asList(
+    private static final Set<String> NUMBER_MATH_NAMES = Set.of(
             "plus", "minus", "multiply", "div", "compareTo", "or", "and", "xor", "intdiv", "mod", "leftShift",
-            "rightShift", "rightShiftUnsigned"));
+            "rightShift", "rightShiftUnsigned");
 
     @Override
     public Object onMethodCall(
@@ -145,10 +141,9 @@ public final class SandboxInterceptor extends GroovyInterceptor {
             }
 
             // Allow calling closure variables from a script binding as methods
-            if (receiver instanceof Script) {
-                Script s = (Script) receiver;
-                if (s.getBinding().hasVariable(method)) {
-                    Object var = s.getBinding().getVariable(method);
+            if (receiver instanceof Script script) {
+                if (script.getBinding().hasVariable(method)) {
+                    Object var = script.getBinding().getVariable(method);
                     if (!InvokerHelper.getMetaClass(var).respondsTo(var, "call", args).isEmpty()) {
                         return onMethodCall(invoker, var, "call", args);
                     }
@@ -274,8 +269,8 @@ public final class SandboxInterceptor extends GroovyInterceptor {
                 };
             }
         }
-        if (receiver instanceof Class) {
-            final Method staticSetterMethod = GroovyCallSiteSelector.staticMethod((Class) receiver, setter, valueArg);
+        if (receiver instanceof Class clazz) {
+            final Method staticSetterMethod = GroovyCallSiteSelector.staticMethod(clazz, setter, valueArg);
             if (staticSetterMethod != null) {
                 if (whitelist.permitsStaticMethod(staticSetterMethod, valueArg)) {
                     return super.onSetProperty(invoker, receiver, property, value);
@@ -289,7 +284,7 @@ public final class SandboxInterceptor extends GroovyInterceptor {
                     };
                 }
             }
-            final Field staticField = GroovyCallSiteSelector.staticField((Class) receiver, property);
+            final Field staticField = GroovyCallSiteSelector.staticField(clazz, property);
             if (staticField != null) {
                 if (whitelist.permitsStaticFieldSet(staticField, value)) {
                     return super.onSetProperty(invoker, receiver, property, value);
@@ -320,9 +315,10 @@ public final class SandboxInterceptor extends GroovyInterceptor {
             final String property) throws Throwable {
 
         MissingPropertyException mpe = null;
-        if (receiver instanceof Script) { // SimpleTemplateEngine "out" variable, and anything else added in a binding
+        // SimpleTemplateEngine "out" variable, and anything else added in a binding
+        if (receiver instanceof Script script) {
             try {
-                ((Script) receiver).getBinding().getVariable(property); // do not let it go to Script.super.getProperty
+                script.getBinding().getVariable(property); // do not let it go to Script.super.getProperty
                 return super.onGetProperty(invoker, receiver, property);
             } catch (MissingPropertyException x) {
                 mpe = x; // throw only if we are not whitelisted
@@ -424,8 +420,8 @@ public final class SandboxInterceptor extends GroovyInterceptor {
         }
 
         // TODO similar metaclass handling for isXXX, static methods (if possible?), setters
-        if (receiver instanceof Class) {
-            final Method staticGetterMethod = GroovyCallSiteSelector.staticMethod((Class) receiver, getter, noArgs);
+        if (receiver instanceof Class clazz) {
+            final Method staticGetterMethod = GroovyCallSiteSelector.staticMethod(clazz, getter, noArgs);
             if (staticGetterMethod != null) {
                 if (whitelist.permitsStaticMethod(staticGetterMethod, noArgs)) {
                     return super.onGetProperty(invoker, receiver, property);
@@ -440,8 +436,7 @@ public final class SandboxInterceptor extends GroovyInterceptor {
                 }
             }
 
-            Method staticBooleanGetterMethod = GroovyCallSiteSelector.
-                    staticMethod((Class) receiver, booleanGetter, noArgs);
+            Method staticBooleanGetterMethod = GroovyCallSiteSelector.staticMethod(clazz, booleanGetter, noArgs);
             if (staticBooleanGetterMethod != null && staticBooleanGetterMethod.getReturnType() == boolean.class) {
                 if (whitelist.permitsStaticMethod(staticBooleanGetterMethod, noArgs)) {
                     return super.onGetProperty(invoker, receiver, property);
@@ -456,7 +451,7 @@ public final class SandboxInterceptor extends GroovyInterceptor {
                     };
                 }
             }
-            Field staticField = GroovyCallSiteSelector.staticField((Class) receiver, property);
+            Field staticField = GroovyCallSiteSelector.staticField(clazz, property);
             if (staticField != null) {
                 if (whitelist.permitsStaticFieldGet(staticField)) {
                     return super.onGetProperty(invoker, receiver, property);
