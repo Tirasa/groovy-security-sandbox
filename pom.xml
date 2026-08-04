@@ -99,6 +99,8 @@
   <properties>
     <groovy.version>6.0.0-beta-1</groovy.version>
 
+    <junit.version>6.1.2</junit.version>
+
     <targetJdk>21</targetJdk>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -116,6 +118,12 @@
       <version>${groovy.version}</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.groovy</groupId>
+      <artifactId>groovy-callsite</artifactId>
+      <version>${groovy.version}</version>
+      <scope>provided</scope>
+    </dependency>
 
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -128,6 +136,21 @@
       <artifactId>groovy-sandbox</artifactId>
       <version>4.3.2</version>
     </dependency>
+
+    <!-- TEST -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- /TEST -->
   </dependencies>
 
   <build>
