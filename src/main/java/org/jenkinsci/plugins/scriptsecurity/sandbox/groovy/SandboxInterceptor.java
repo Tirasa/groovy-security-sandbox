@@ -31,11 +31,17 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.groovy.sql.extensions.SqlExtensions;
@@ -59,6 +65,36 @@ import org.kohsuke.groovy.sandbox.GroovyInterceptor;
 public final class SandboxInterceptor extends GroovyInterceptor {
 
     private static final Logger LOG = Logger.getLogger(SandboxInterceptor.class.getName());
+
+    private static Runnable wrap(final Runnable runnable) {
+        List<GroovyInterceptor> interceptors = getApplicableInterceptors();
+        Optional<GroovyInterceptor> interceptor = interceptors.isEmpty()
+                ? Optional.empty() : Optional.of(interceptors.getFirst());
+
+        return () -> {
+            interceptor.ifPresent(GroovyInterceptor::register);
+            try {
+                runnable.run();
+            } finally {
+                interceptor.ifPresent(GroovyInterceptor::unregister);
+            }
+        };
+    }
+
+    private static <V> Callable<V> wrap(final Callable<V> callable) {
+        List<GroovyInterceptor> interceptors = getApplicableInterceptors();
+        Optional<GroovyInterceptor> interceptor = interceptors.isEmpty()
+                ? Optional.empty() : Optional.of(interceptors.getFirst());
+
+        return () -> {
+            interceptor.ifPresent(GroovyInterceptor::register);
+            try {
+                return callable.call();
+            } finally {
+                interceptor.ifPresent(GroovyInterceptor::unregister);
+            }
+        };
+    }
 
     private final Whitelist whitelist;
 
@@ -101,6 +137,31 @@ public final class SandboxInterceptor extends GroovyInterceptor {
             final String method,
             final Object... args)
             throws Throwable {
+
+        if (receiver instanceof Executor) {
+            if ("execute".equals(method) && args.length > 0) {
+                if (args[0] instanceof Runnable runnable) {
+                    args[0] = wrap(runnable);
+                } else if (args[0] instanceof Callable<?> callable) {
+                    args[0] = wrap(callable);
+                }
+            }
+        }
+
+        if (receiver instanceof ExecutorService) {
+            if ("submit".equals(method) && args.length > 0) {
+                if (args[0] instanceof Runnable runnable) {
+                    args[0] = wrap(runnable);
+                } else if (args[0] instanceof Callable<?> callable) {
+                    args[0] = wrap(callable);
+                }
+            }
+            if ("invokeAll".equals(method) && args.length > 0 && args[0] instanceof Collection) {
+                @SuppressWarnings("unchecked")
+                Collection<Callable<?>> callables = (Collection<Callable<?>>) args[0];
+                args[0] = callables.stream().map(SandboxInterceptor::wrap).collect(Collectors.toList());
+            }
+        }
 
         Method m = GroovyCallSiteSelector.method(receiver, method, args);
         if (m == null) {
@@ -187,6 +248,12 @@ public final class SandboxInterceptor extends GroovyInterceptor {
             final GroovyInterceptor.Invoker invoker,
             final Class receiver,
             final Object... args) throws Throwable {
+
+        if (Thread.class.isAssignableFrom(receiver)) {
+            if (args.length > 0 && args[0] instanceof Runnable runnable) {
+                args[0] = wrap(runnable);
+            }
+        }
 
         Constructor<?> c = GroovyCallSiteSelector.constructor(receiver, args);
         if (c == null) {
@@ -625,8 +692,8 @@ public final class SandboxInterceptor extends GroovyInterceptor {
         try {
             return DefaultGroovyMethods.getMetaClass(receiver).pickMethod(method, types);
         } catch (GroovyRuntimeException x) { // ambiguous call, supposedly
-            LOG.log(Level.FINE, "could not find metamethod for " + receiver.getClass() + "." + method + Arrays.
-                    toString(types), x);
+            LOG.log(Level.FINE,
+                    "could not find metamethod for " + receiver.getClass() + "." + method + Arrays.toString(types), x);
             return null;
         }
     }
