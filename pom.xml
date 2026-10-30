@@ -97,9 +97,9 @@
   </developers>
 
   <properties>
-    <groovy.version>6.0.0-beta-1</groovy.version>
+    <groovy.version>6.0.0</groovy.version>
 
-    <junit.version>6.1.2</junit.version>
+    <junit.version>6.1.3</junit.version>
 
     <targetJdk>21</targetJdk>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
